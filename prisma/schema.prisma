@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//////////////////////////////
+// AUTH & USUÁRIO
+//////////////////////////////
+
+model User {
+  id              String   @id @default(cuid())
+  name            String?
+  email           String?  @unique
+  emailVerified   DateTime?
+  image           String?
+  role            String   @default("USER")
+
+  accounts        Account[]
+  sessions        Session[]
+
+  trainingSessions TrainingSession[]
+  exerciseProgress ExerciseProgress[]
+  stats            UserStats?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model VerificationToken {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+//////////////////////////////
+// CONTEÚDO DO SITE
+//////////////////////////////
+
+model Menu {
+  id      Int   @id @default(1)
+  logoUrl String?
+  links   Json
+}
+
+model Banner {
+  id      Int   @id @default(1)
+  banners Json
+}
+
+model Testimonial {
+  id        String    @id @default(cuid())
+  name      String
+  content   String
+  avatarUrl String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model FAQ {
+  id        String    @id @default(cuid())
+  pergunta  String
+  resposta  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Blog {
+  id          String     @id @default(uuid())
+  title       String
+  slug        String     @unique
+  subtitle    String?
+  description String?
+  publico     Boolean    @default(true)
+  items       BlogFoto[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model BlogFoto {
+  id        String   @id @default(uuid())
+  img       String
+  blogId    String
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//////////////////////////////
+// TREINO & PROGRESSO
+//////////////////////////////
+
+model Exercise {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  level       Int      // dificuldade
+  duration    Int      // segundos
+  createdAt   DateTime @default(now())
+}
+
+model TrainingPlan {
+  id          String   @id @default(cuid())
+  title       String
+  week        Int
+  exercises   Json     // lista ordenada de exercícios
+  createdAt   DateTime @default(now())
+}
+
+model TrainingSession {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime
+  completed   Boolean @default(false)
+  perceivedControl Int? // autoavaliação do usuário (1–5)
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+}
+
+model ExerciseProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  exerciseId  String
+  repetitions Int
+  completedAt DateTime
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise    Exercise @relation(fields: [exerciseId], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+model UserStats {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+
+  consistency   Int      @default(0) // dias seguidos
+  powerLevel    Int      @default(1) // gamificação
+  totalSessions Int      @default(0)
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  updatedAt     DateTime @updatedAt
+}
