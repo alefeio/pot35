@@ -12,26 +12,26 @@ datasource db {
 //////////////////////////////
 
 model User {
-  id              String   @id @default(cuid())
-  name            String?
-  email           String?  @unique
-  emailVerified   DateTime?
-  image           String?
-  role            String   @default("USER")
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("USER")
 
-  accounts        Account[]
-  sessions        Session[]
+  accounts Account[]
+  sessions Session[]
 
   trainingSessions TrainingSession[]
   exerciseProgress ExerciseProgress[]
   stats            UserStats?
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Account {
-  id                String   @id @default(cuid())
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -44,10 +44,10 @@ model Account {
   id_token          String?
   session_state     String?
 
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([provider, providerAccountId])
 }
@@ -58,10 +58,10 @@ model Session {
   userId       String
   expires      DateTime
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -78,31 +78,31 @@ model VerificationToken {
 //////////////////////////////
 
 model Menu {
-  id      Int   @id @default(1)
+  id      Int     @id @default(1)
   logoUrl String?
   links   Json
 }
 
 model Banner {
-  id      Int   @id @default(1)
+  id      Int  @id @default(1)
   banners Json
 }
 
 model Testimonial {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   name      String
   content   String
   avatarUrl String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model FAQ {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   pergunta  String
   resposta  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Blog {
@@ -131,32 +131,33 @@ model BlogFoto {
 //////////////////////////////
 
 model Exercise {
-  id          String   @id @default(cuid())
-  name        String
-  description String
-  level       Int      // dificuldade
-  duration    Int      // segundos
-  createdAt   DateTime @default(now())
+  id                 String             @id @default(cuid())
+  name               String
+  description        String
+  level              Int // dificuldade
+  duration           Int // segundos
+  createdAt          DateTime           @default(now())
+  exerciseProgresses ExerciseProgress[]
 }
 
 model TrainingPlan {
-  id          String   @id @default(cuid())
-  title       String
-  week        Int
-  exercises   Json     // lista ordenada de exercícios
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  title     String
+  week      Int
+  exercises Json // lista ordenada de exercícios
+  createdAt DateTime @default(now())
 }
 
 model TrainingSession {
-  id          String   @id @default(cuid())
-  userId      String
-  date        DateTime
-  completed   Boolean @default(false)
+  id               String   @id @default(cuid())
+  userId           String
+  date             DateTime
+  completed        Boolean  @default(false)
   perceivedControl Int? // autoavaliação do usuário (1–5)
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model ExerciseProgress {
@@ -166,21 +167,21 @@ model ExerciseProgress {
   repetitions Int
   completedAt DateTime
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercise    Exercise @relation(fields: [exerciseId], references: [id])
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model UserStats {
-  id            String   @id @default(cuid())
-  userId        String   @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
-  consistency   Int      @default(0) // dias seguidos
-  powerLevel    Int      @default(1) // gamificação
-  totalSessions Int      @default(0)
+  consistency   Int @default(0) // dias seguidos
+  powerLevel    Int @default(1) // gamificação
+  totalSessions Int @default(0)
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  updatedAt     DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 }
